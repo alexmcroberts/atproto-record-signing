@@ -1,0 +1,7 @@
+{
+  "$type": "app.bsky.feed.post",
+  "text": "Hello, AT Protocol! This is a signed lexicon record.",
+  "createdAt": "2023-04-10T12:00:00Z",
+  "author": "did:plc:example123",
+  "signature": "pRA0ba8sQf7ZbVbIrjr+jFdM/hS8wnKiyXaCuqd4vIUtdN16trt2sTDimdJGTs1pas9wG6vy7+9SAC0HG5WoGg"
+}

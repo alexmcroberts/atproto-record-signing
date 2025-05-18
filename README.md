@@ -15,17 +15,102 @@ This example demonstrates:
 4. Verifying the signature
 5. Testing invalid signatures (hardcoded values)
 
-## Usage
+## Project Structure
 
-```bash
-go run sign_verify.go
+```
+jwks/
+├── cmd/
+│   ├── keys/           # Key generation utilities
+│   │   ├── generate_keys.go
+│   │   └── generate_keys_test.go
+│   └── verify/         # Signature verification utilities
+│       ├── sign_verify.go
+│       └── sign_verify_test.go
+└── README.md
 ```
 
-The script will:
-1. Generate a new key pair
-2. Run two test cases:
-   - Working Record Test: Creates, signs, and verifies a valid record
-   - Broken Record Test: Demonstrates verification failure with a hardcoded signature
+## Usage
+
+### Generating Keys
+
+To generate a new key pair:
+
+```bash
+# From the jwks directory
+go run ./cmd/keys/generate_keys.go
+```
+
+This will:
+1. Generate a new P-256 key pair
+2. Save the keys to `keys/keypair.json`
+3. Print the keys in various formats (Multibase and DID)
+
+### Using the Signature Library
+
+The `sign_verify.go` file provides a library for signing and verifying AT Protocol lexicon records. The `LexiconRecord` struct includes a `Signature` field that is used to store the signature after signing:
+
+```go
+type LexiconRecord struct {
+    Type      string `json:"$type"`
+    Text      string `json:"text"`
+    CreatedAt string `json:"createdAt"`
+    Author    string `json:"author"`
+    Signature string `json:"signature,omitempty"` // Used to store the signature
+}
+```
+
+Here's how to use it in your code:
+
+```go
+import "github.com/yourusername/jwks/cmd/verify"
+
+// Create a record (Signature field will be empty initially)
+record := verify.LexiconRecord{
+    Type:      "app.bsky.feed.post",
+    Text:      "Hello, AT Protocol!",
+    CreatedAt: "2023-04-10T12:00:00Z",
+    Author:    "did:plc:example123",
+}
+
+// Sign the record - this will set the Signature field
+err := record.Sign(privateKey)
+if err != nil {
+    log.Fatal(err)
+}
+// record.Signature now contains the base64-encoded signature
+
+// Verify the signature using the public key and the stored signature
+err = record.VerifySignature(publicKey)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+Important notes about the signature field:
+1. The `Signature` field is optional in the JSON representation (`omitempty` tag)
+2. When signing a record, the `Signature` field is automatically set with the base64-encoded signature
+3. When verifying a record, the `Signature` field must be present and contain a valid signature
+4. The verification process:
+   - Extracts the signature from the `Signature` field
+   - Creates a copy of the record with an empty signature
+   - Verifies the signature against this unsigned copy
+   - Uses the provided public key to verify the signature
+
+### Running Tests
+
+To run all tests:
+
+```bash
+# From the jwks directory
+go test ./...
+```
+
+To run tests with coverage:
+
+```bash
+# From the jwks directory
+go test -cover ./...
+```
 
 ## Implementation Details
 
@@ -38,13 +123,21 @@ The script will:
 
 ## Code Structure
 
-The example includes:
+### Key Generation (`cmd/keys/`)
+- `KeyPair` struct for storing public/private keys
+- Functions for generating and saving key pairs
+- Tests for key generation and verification
+
+### Signature Verification (`cmd/verify/`)
 - `LexiconRecord` struct with embedded signature field
 - Methods for handling signatures:
   - `UnsignedBytes()`: Gets record bytes without signature
   - `Sign()`: Signs the record
   - `VerifySignature()`: Verifies the record's signature
-- Test functions demonstrating both valid and invalid signatures
+- Comprehensive test suite covering:
+  - Valid signature creation and verification
+  - Invalid signature handling
+  - Error cases (nil keys, unsigned records, etc.)
 
 ## References
 

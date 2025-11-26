@@ -55,8 +55,8 @@ func SaveKeyPair(keyPair *KeyPair, dir string) error {
 	return nil
 }
 
-// LoadAndVerifyKeyPair loads a key pair from a file and verifies it
-func LoadAndVerifyKeyPair(keyPair *KeyPair) error {
+// ValidateKeyPair loads a key pair from a file and verifies it
+func ValidateKeyPair(keyPair *KeyPair) error {
 	// Demonstrate loading a private key from a multibase string
 	loadedPrivateKey, err := crypto.ParsePrivateMultibase(keyPair.PrivateKey)
 	if err != nil {
@@ -108,7 +108,7 @@ func main() {
 	fmt.Printf("Key pair saved to keys/keypair.json\n")
 
 	// Verify the key pair
-	if err := LoadAndVerifyKeyPair(keyPair); err != nil {
+	if err := ValidateKeyPair(keyPair); err != nil {
 		log.Fatalf("Failed to verify key pair: %v", err)
 	}
 

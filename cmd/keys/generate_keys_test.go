@@ -93,7 +93,7 @@ func TestSaveKeyPair(t *testing.T) {
 	}
 }
 
-func TestLoadAndVerifyKeyPair(t *testing.T) {
+func TestVerifyKeyPair(t *testing.T) {
 	// Generate key pair
 	keyPair, err := GenerateKeyPair()
 	if err != nil {
@@ -101,21 +101,21 @@ func TestLoadAndVerifyKeyPair(t *testing.T) {
 	}
 
 	// Test verification
-	if err := LoadAndVerifyKeyPair(keyPair); err != nil {
+	if err := ValidateKeyPair(keyPair); err != nil {
 		t.Fatalf("Failed to verify key pair: %v", err)
 	}
 
 	// Test with invalid private key
 	invalidKeyPair := *keyPair
 	invalidKeyPair.PrivateKey = "invalid"
-	if err := LoadAndVerifyKeyPair(&invalidKeyPair); err == nil {
+	if err := ValidateKeyPair(&invalidKeyPair); err == nil {
 		t.Error("Expected error with invalid private key, got nil")
 	}
 
 	// Test with invalid DID key
 	invalidKeyPair = *keyPair
 	invalidKeyPair.DIDKey = "invalid"
-	if err := LoadAndVerifyKeyPair(&invalidKeyPair); err == nil {
+	if err := ValidateKeyPair(&invalidKeyPair); err == nil {
 		t.Error("Expected error with invalid DID key, got nil")
 	}
 }
